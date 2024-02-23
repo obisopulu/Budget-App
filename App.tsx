@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { SQLiteProvider } from 'expo-sqlite/next';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+import Home from './screens/Home';
+
+const Stack = createNativeStackNavigator()
 
 const loadDatabase = async () => {
   const dbName = 'mySQLiteDB';
@@ -34,23 +40,40 @@ export default function App() {
     return (
       <View style={{flex:1}}>
         <ActivityIndicator size="large" />
-        <Text>Loading...</Text>;
+        <Text>Loading...</Text>
       </View>
     )
 
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app! xx</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Suspense
+        fallback={
+          <View style={{flex:1}}>
+            <ActivityIndicator size="large" />
+            <Text>Loading...</Text>
+          </View>
+        }
+      >
+        <SQLiteProvider
+          databaseName='mySQLiteDB.db'
+          useSuspense
+        >
+          <Stack.Navigator>
+            <Stack.Screen name="Home" 
+              component={Home} 
+              options={{
+                headerTitle: 'Budget App',
+                headerTintColor: '#FFF',
+                headerLargeTitle: true,
+                headerShown: false,
+                headerStyle:{
+                    backgroundColor: '#222'
+                }
+            }}
+            />
+          </Stack.Navigator>
+        </SQLiteProvider>
+      </Suspense>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
